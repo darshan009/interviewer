@@ -1,0 +1,14 @@
+block vars
+doctype html
+html(lang="en")
+    head
+        title Interviewer | #{title}
+        link(rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap.css")
+        link(rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap-theme.css")
+    body
+        include ./partials/nav.jade
+        include ./partials/flash.jade
+        .container
+          block content
+        script(type="text/javascript" src="/vendor/jquery/dist/jquery.js")
+        script(type="text/javascript" src="/vendor/bootstrap/dist/js/bootstrap.js")

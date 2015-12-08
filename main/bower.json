@@ -1,0 +1,22 @@
+{
+  "name": "interviewer",
+  "description": "A SAAS app for recruiters",
+  "main": "index.js",
+  "authors": [
+    "darshan009 <darshansapaliga009@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/darshan009/interviewer",
+  "moduleType": [],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6"
+  }
+}

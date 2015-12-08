@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h4 Create a new test
+  a(href="/test/screening/newtest") New Test
+  br
+  h3 List of your tests
+  each test in tests
+    a(href="/test/screening/#{test.name}") #{test.name}
