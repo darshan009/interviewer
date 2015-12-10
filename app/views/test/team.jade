@@ -1,6 +1,7 @@
 
 block content
   h3 Members in the team
-  each test in tests
-    p #{test.hiringTeam} #{test.hiringTeam}
-  
+  each user in users
+    p #{user.email}
+    br
+  a(href="#" test-from-team="#{tests._id}" id="addMember") Add a new team member

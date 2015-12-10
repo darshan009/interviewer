@@ -2,6 +2,16 @@ var passport = require('passport');
 var User = require('../models/User');
 var Company = require('../models/Company');
 var Test = require('../models/Test');
+var secrets = require('../config/secrets');
+var nodemailer = require('nodemailer');
+// create reusable transporter object using SMTP transport
+var transporter = nodemailer.createTransport({
+    service: 'Mandrill',
+    auth: {
+        user: 'secrets.email',
+        pass: 'email.password'
+    }
+});
 
 //adding company
 exports.getAddCompany = function(req, res, next){
@@ -27,18 +37,52 @@ exports.postSignUp = function(req,res){
         password:req.body.password,
         companyId: company._id
     });
+  //sending Verification mail
+  rand=Math.floor((Math.random() * 100) + 54);
+  host=req.get('host');
+  link="http://localhost:4000/"+user.email+"/verify?id="+rand;
+    //mail options
+    mailOptions = {
+      from: 'Interviewer.com ✔ <sobingt@gmail.com>',
+      to: req.body.email,
+      subject: 'Account Creation',
+      text: 'Below is a test link. Kindly click the link to get started with your interviewer Account',
+      html: "Hello,<br> Please Click on the link to verify your email.<br><a href="+link+">Click here to verify</a>"
+    };
+    // send mail with defined transport object
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error)
+          return console.log(error);
+    });
     user.save(function(err){
-        var error;
-        if (!err){
-            res.redirect('/');
-        }
+        if (!err)
+            res.end("<h1> Verification mail has been sent to your email </h1>");
         else if(err.code === 11000)
             error = "Provided email already exists..! try another.";
         else
             error = "Unable to save register.. Try again";
-        res.render('signup', {error: error});
     });
   });
+};
+//verify user
+exports.getVerify = function(req, res){
+  if((req.protocol+"://localhost:4000")==("http://localhost:4000"))
+  {
+    if(req.query.id==rand)
+    {
+      User.findOne({email: req.params.email}, function(err, users){
+          res.end("<h1>Email "+mailOptions.to+" is been successfully verified");
+          users.status = true;
+          users.save();
+      });
+    }
+    else {
+      res.end("<h1> Bad Request </h1>");
+    }
+  }
+  else {
+    res.end("<h1> Request from unknown source");
+  }
 };
 //User login
 exports.isLogged = function(req, res, next){
@@ -51,7 +95,7 @@ exports.isLogged = function(req, res, next){
     res.render('login');
 };
 //login logout signup
-exports.getLogin = function(req, res, next){
+exports.getLogin = function(req, res){
   res.render('login');
 };
 exports.postLogin = function(req, res, next){
@@ -61,47 +105,17 @@ exports.postLogin = function(req, res, next){
       if(!user){
         res.redirect('/login',{message: info.message});
       }
-      req.logIn(user,function(err){
-        if(err)
-          return next(err);
-        res.redirect('/');
-      });
+      if(user.status){
+        req.logIn(user,function(err){
+          if(err)
+            return next(err);
+          res.redirect('/');
+        });
+      }
+      res.end("User is not verified");
     })(req, res, next);
 };
 exports.getLogout = function(req, res, next){
   req.logout();
   res.redirect('/');
-};
-
-//tests
-exports.getTest = function(req, res){
-  res.render('test');
-};
-exports.getTestScreening = function(req, res){
-  Test.find({companyId: req.user.companyId}, function(err, tests){
-    if(err)
-      return next(err);
-    res.render('screening', {tests: tests});
-  });
-};
-//create test
-exports.getNewTest = function(req, res, next){
-  res.render('newtest');
-};
-exports.postNewTest = function(req, res, next){
-  var test = new Test({
-    name: req.body.name,
-    companyId: req.user.companyId,
-    hiringTeam: req.user._id
-  });
-  test.save();
-  res.redirect('/test/screening');
-};
-//test page
-exports.getTest = function(req, res){
-  Test.findOne({name: req.params.name}, function(err, tests){
-    if(err)
-      return next(err);
-    res.render('testpage', {tests: tests});
-  });
 };

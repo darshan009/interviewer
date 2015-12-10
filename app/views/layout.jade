@@ -5,6 +5,7 @@ html(lang="en")
         title Interviewer | #{title}
         link(rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap.css")
         link(rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap-theme.css")
+        link(href='/css/simple-sidebar.css', rel='stylesheet')
     body
         include ./partials/nav.jade
         include ./partials/flash.jade
@@ -12,3 +13,4 @@ html(lang="en")
           block content
         script(type="text/javascript" src="/vendor/jquery/dist/jquery.js")
         script(type="text/javascript" src="/vendor/bootstrap/dist/js/bootstrap.js")
+        script(src='/js/main.js')

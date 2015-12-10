@@ -1,0 +1,7 @@
+extends ../layout2
+
+block content
+  h3 Your question list
+  each question in questions
+    p #{question}
+  a(href='#' id="addQuestions") Add a new question

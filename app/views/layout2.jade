@@ -1,15 +1,7 @@
 
 doctype html
 html(lang="en")
-  head
-    title Interviewer | #{title}
-    link(rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap.css")
-    link(rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap-theme.css")
-    link(href='/css/simple-sidebar.css', rel='stylesheet')
   body
-    include ./partials/nav.jade
     .container
       block content
-    script(type="text/javascript" src="/vendor/jquery/dist/jquery.js")
-    script(type="text/javascript" src="/vendor/bootstrap/dist/js/bootstrap.js")
     script(src='/js/main.js')

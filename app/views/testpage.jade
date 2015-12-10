@@ -1,4 +1,4 @@
-extends layout2
+extends layout
 
 block content
   #wrapper
@@ -8,13 +8,13 @@ block content
         li.sidebar-brand
           a(href='#') #{tests.name}
         li
-          a(href='#' id="team") Team
+          a(href='#' data-team-id="#{tests._id}" id="team") Team
         li
-          a(href='#' id="questions") Questions
+          a(href='#' data-questions-id="#{tests._id}" id="questions") Questions
         li
-          a(href='#' id="candidates") All Candidates
+          a(href='#' data-candidates-id="#{tests._id}" id="candidates") All Candidates
         li
-          a(href='#' id="completed") Completed tests
+          a(href='#' data-completed-id="#{tests._id}" id="completed") Completed tests
         li
-          a(href='#' id="accepted") Accepted
+          a(href='#' data-accepted-id="#{tests._id}" id="accepted") Accepted
     #contents
