@@ -3,13 +3,14 @@ var User = require('../models/User');
 var Company = require('../models/Company');
 var Test = require('../models/Test');
 var secrets = require('../config/secrets');
+var rand=Math.floor((Math.random() * 100) + 54);
 var nodemailer = require('nodemailer');
 // create reusable transporter object using SMTP transport
 var transporter = nodemailer.createTransport({
     service: 'Mandrill',
     auth: {
-        user: 'secrets.email',
-        pass: 'email.password'
+        user: secrets.email,
+        pass: secrets.password
     }
 });
 

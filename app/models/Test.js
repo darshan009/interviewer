@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 
 var testSchema = mongoose.Schema({
   name: String,
-  hiringTeam: [{type: mongoose.Schema.Types.ObjectId}],
+  hiringTeam: [{type: mongoose.Schema.Types.ObjectId}, ref='User'],
   questions: [{
     question: String,
     opts:[String],

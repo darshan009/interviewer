@@ -11,7 +11,7 @@ var secrets = require('./config/secrets');
 var app = express();
 
 //mongoose connection
-mongoose.connect("secrets.mongodburl");
+mongoose.connect(secrets.mongodburl);
 mongoose.connection.on('error', function(){
   console.log("Mongoose connection error");
 });
@@ -61,9 +61,11 @@ app.get('/test/screening', testController.getTestScreening);
 app.get('/test/screening/:name', testController.getTest);
 //testpage routes
 app.get('/partial/team/:id', testController.getTeam);
-app.get('/partial/team/:id/addMember', testController.getaddMember);
-app.post('/partial/team/addMember', testController.postaddMember);
+app.get('/partial/team/:id/addMember', testController.getAddMember);
+app.post('/partial/team/:id/addMember', testController.postAddMember);
 app.get('/partial/questions/:id', testController.getQuestions);
+app.get('/partial/questions/:id/addQuestions', testController.getAddQuestions);
+app.post('/partial/questions/:id/addQuestions', testController.postAddQuestions);
 app.get('/partial/candidates/:id', testController.getCandidates);
 app.get('/partial/accepted/:id', testController.getAccepted);
 //questions

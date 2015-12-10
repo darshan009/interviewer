@@ -1,7 +1,10 @@
 extends ../layout2
 
 block content
-  h3 Your question list
-  each question in questions
-    p #{question}
-  a(href='#' id="addQuestions") Add a new question
+  if(questions)
+    h3 Your question list
+    each question in questions
+      p #{question}
+  else
+    h3 You have no questions
+  a(href='#' id="addQuestions" test-data="#{tests._id}") Add a new question

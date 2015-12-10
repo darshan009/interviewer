@@ -1,6 +1,16 @@
 var User = require('../models/User');
 var Company = require('../models/Company');
 var Test = require('../models/Test');
+var secrets = require('../config/secrets');
+var nodemailer = require('nodemailer');
+// create reusable transporter object using SMTP transport
+var transporter = nodemailer.createTransport({
+    service: 'Mandrill',
+    auth: {
+        user: secrets.email,
+        pass: secrets.password
+    }
+});
 
 
 //tests
@@ -52,17 +62,41 @@ exports.getTeam = function(req, res){
     });
   });
 };
-exports.getaddMember = function(req, res){
-  res.render('./test/addMember');
-};
-exports.postaddMember = function(req, res){
-  User.findOne({email: req.body.email}, function(err, users){
-    if(users)
-    {
-
-    }
+exports.getAddMember = function(req, res){
+  Test.findById(req.params.id, function(err, tests){
+    res.render('./test/addMember', {tests: tests});
   });
 };
+exports.postAddMember = function(req, res){
+  User.findOne({email: req.body.email}, function(err, users){
+    Test.findById(req.params.id, function(err, tests){
+      if(users)
+      {
+        tests.hiringTeam.push(users._id);
+        tests.save();
+        res.redirect('/partial/team/'+tests._id);
+        res.end("Successfully added");
+      }
+      userEmail = req.user.email;
+      link="http://localhost:4000/signup";
+        //mail options
+        mailOptions = {
+          from: 'Interviewer.com ✔ <sobingt@gmail.com>',
+          to: req.body.email,
+          subject: 'Invitation for team member',
+          text: 'You are invited by '+userEmail+' to join as a team member for '+tests.name,
+          html: "Hello,<br> Please Click on the link to create your account.<br><a href="+link+">Click here to join</a>"
+        };
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, function(error, info){
+            if(error)
+              return console.log(error);
+        });
+    });
+  });
+};
+
+//questions part
 exports.getQuestions = function(req, res){
   Test.findById(req.params.id, function(err, tests){
     if(tests){
@@ -74,17 +108,22 @@ exports.getQuestions = function(req, res){
   });
 };
 exports.getAddQuestions = function(req, res){
-  res.render('./test/addQuestions');
-};
-exports.getAddQuestions = function(req, res){
-  var test = new Test({
-
+  Test.findById(req.params.id, function(err, tests){
+    res.render('./test/addQuestions', {tests: tests});
   });
 };
+exports.postAddQuestions = function(req, res){
+  var test = new Test({
+    question: req.body.question
+    //opts: opts.push(req.body.option1)
+  });
+  test.save();
+};
+
 //invite candidates
-exports.getCompleted = function(req, res){
+exports.getInvites = function(req, res){
   Test.find({companyId: req.user.companyId}, function(err, tests){
-    res.render('./test/completed');
+    res.render('./test/invites');
   });
 };
 //all candidates
