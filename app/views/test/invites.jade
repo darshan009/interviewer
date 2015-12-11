@@ -2,7 +2,7 @@ extends ../layout2
 
 block content
   h3 Enter the candidates email address below
-  form(method="POST")
-    input(type="text" name="email" placeholder="email-id" required="true")
+  form(method="POST" id="invitesForm")
+    input(type="text" name="email" id="invitesEmail" data-from-invites="#{tests._id}" placeholder="email-id" required="true")
     br
-    inpput(type="Submit" value="Send invite")
+    input(type="Submit" value="Send invite")

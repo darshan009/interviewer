@@ -2,16 +2,16 @@ extends ../layout2
 
 block content
   h3 Add your question below
-  form(method="post")
-    input(type=text name="question" placeholder="Your question" required="true")
+  form(method="post" id="addNewQuestion")
+    input(type=text name="question" id="questionList" data-test-addQuestion="#{tests._id}" placeholder="Your question" required="true")
     br
     br
-    input(type=text name="option1" placeholder="Choice 1" required="true")
+    input(type=text name="option1" id="optionsList1" placeholder="Choice 1" required="true")
     br
-    input(type=text name="option2" placeholder="Choice 2" required="true")
+    input(type=text name="option2" id="optionsList2" placeholder="Choice 2" required="true")
     br
-    input(type=text name="option3" placeholder="Choice 3" required="true")
+    input(type=text name="option3" id="optionsList3" placeholder="Choice 3" required="true")
     br
-    input(type=text name="correct" placeholder="Correct option number" required="true")
+    input(type=text name="correct" id="correctOne" placeholder="Correct option number" required="true")
     br
     input(type="Submit" value="Add question")

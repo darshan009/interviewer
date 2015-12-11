@@ -1,0 +1,8 @@
+extends ../layout
+
+block content
+  h3 Give your test here
+  form(method="post")
+    each question in questions
+      p #{question}
+    input(type="Submit" value="Submit your answers")

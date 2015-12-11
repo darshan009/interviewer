@@ -60,14 +60,27 @@ app.get('/test', testController.getTestInterview);
 app.get('/test/screening', testController.getTestScreening);
 app.get('/test/screening/:name', testController.getTest);
 //testpage routes
+//team
 app.get('/partial/team/:id', testController.getTeam);
 app.get('/partial/team/:id/addMember', testController.getAddMember);
 app.post('/partial/team/:id/addMember', testController.postAddMember);
+//questions
 app.get('/partial/questions/:id', testController.getQuestions);
 app.get('/partial/questions/:id/addQuestions', testController.getAddQuestions);
 app.post('/partial/questions/:id/addQuestions', testController.postAddQuestions);
+//invites
+app.get('/partial/candidates/:id/invites', testController.getInvites);
+app.post('/partial/candidates/:id/invites', testController.postInvites);
+//add candidates
+app.get('/partial/:id/:candidate', testController.getAddCandidate);
+app.post('/partial/:id/:candidate', testController.postAddCandidate);
+//give Tests
+app.get('/partial/:id/:candidate/givetest', testController.getGiveTest);
+app.post('/partial/:id/:candidate/givetest', testController.postGiveTest);
+//get all candidates
 app.get('/partial/candidates/:id', testController.getCandidates);
 app.get('/partial/accepted/:id', testController.getAccepted);
+
 //questions
 app.get('/partial/team/addQuestions', testController.getAddQuestions);
 //listen

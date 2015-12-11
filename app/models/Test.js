@@ -9,6 +9,11 @@ var testSchema = mongoose.Schema({
     correct: Number
   }],
   companyId: {type: mongoose.Schema.Types.ObjectId, ref: 'Company'},
+  testTaker: [{
+    candidateId: {type:mongoose.Schema.Types.ObjectId, ref: 'Candidate'},
+    question: String,
+    correctAns: Number
+  }],
   allCandidates: [{type: mongoose.Schema.Types.ObjectId}],
   testCompleted: [{type: mongoose.Schema.Types.ObjectId}],
   accepted: [{type: mongoose.Schema.Types.ObjectId}]
