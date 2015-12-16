@@ -3,8 +3,11 @@ extends ../layout2
 block content
   if(questions)
     h3 Your question list
-    each question in questions
-      p #{question}
+    each question, index in questions
+      p= index+1 +"."
+      | #{question.question}
   else
     h3 You have no questions
+  br
+  br
   a(href='#' id="addQuestions" data-test-question="#{tests._id}") Add a new question

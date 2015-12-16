@@ -1,4 +1,6 @@
+extends ../layout2
+
 block content
-  h3 Candidates
-  each user in users
-    #{user.email}
+  h3 All candidates
+  each candidates, index in candidate
+    p #{candidates.firstname} #{candidates.lastname}

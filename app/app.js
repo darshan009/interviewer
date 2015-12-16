@@ -72,17 +72,19 @@ app.post('/partial/questions/:id/addQuestions', testController.postAddQuestions)
 app.get('/partial/candidates/:id/invites', testController.getInvites);
 app.post('/partial/candidates/:id/invites', testController.postInvites);
 //add candidates
-app.get('/partial/:id/:candidate', testController.getAddCandidate);
-app.post('/partial/:id/:candidate', testController.postAddCandidate);
+//app.get('/partial/:id/:email', testController.getAddCandidate);
+//app.post('/partial/:id/:email', testController.postAddCandidate);
 //give Tests
-app.get('/partial/:id/:candidate/givetest', testController.getGiveTest);
-app.post('/partial/:id/:candidate/givetest', testController.postGiveTest);
+app.get('/partial/:id/:email/giveTest', testController.getGiveTest);
+app.post('/partial/:id/:email/giveTest', testController.postGiveTest);
 //get all candidates
-app.get('/partial/candidates/:id', testController.getCandidates);
+app.get('/partial/displayAllCandidates/:id', testController.getDisplayAllCandidates);
+//completed candidates
+app.get('/partial/completed/:id', testController.getCompleted);
+app.post('/partial/completed/:id', testController.postCompleted);
+//accepted candidates
 app.get('/partial/accepted/:id', testController.getAccepted);
 
-//questions
-app.get('/partial/team/addQuestions', testController.getAddQuestions);
 //listen
 app.listen('4000', function(){
   console.log("Server at port 4000");

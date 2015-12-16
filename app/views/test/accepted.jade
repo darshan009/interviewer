@@ -1,0 +1,6 @@
+extends ../layout2
+
+block content
+  h3 Accepted candidates
+  each candidates in candidate
+    p #{candidates.firstname} #{candidates.lastname}

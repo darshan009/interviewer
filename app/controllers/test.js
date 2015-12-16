@@ -14,7 +14,6 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-
 //tests
 exports.getTest = function(req, res){
   res.render('test');
@@ -107,7 +106,7 @@ exports.getQuestions = function(req, res){
       for(var i=0; i< tests.questions.length; i++)
         questions.push(tests.questions[i]);
     }
-    res.render('./test/questions', {questions: [questions], tests: tests});
+    res.render('./test/questions', {questions: questions, tests: tests});
   });
 };
 exports.getAddQuestions = function(req, res){
@@ -168,18 +167,22 @@ exports.postInvites = function(req, res){
 //add a candidate
 exports.getAddCandidate = function(req, res){
   Test.findById(req.params.id, function(err, tests){
-    res.render('./test/addCandidate', {tests: tests});
+    if(tests)
+      console.log("Coming to add candidates");
+      res.render('./test/addCandidate', {tests: tests});
   });
 };
 exports.postAddCandidate = function(req, res){
   Test.findById(req.params.id, function(err, tests){
-    Candidate.findOne({email: req.params.candidate}, function(err, candidate){
-      candidate.firstname = req.body.firstname;
-      candidate.lastname = req.body.lastname;
-      candidate.phone = req.body.phone;
-      candidate.save();
-      res.redirect("/partial/"+tests._id+"/"+candidate.email+"/givetest");
-    });
+    Candidate.findOne({email: req.params.email}, function(err, candidate){
+          candidate.firstname = req.body.firstname;
+          candidate.lastname = req.body.lastname;
+          candidate.phone = req.body.phone;
+          candidate.save();
+          tests.allCandidates = candidate._id;
+          tests.save();
+          res.redirect("/partial/"+tests._id+"/"+candidate.email+"/givetest");
+      });
   });
 };
 
@@ -187,44 +190,119 @@ exports.postAddCandidate = function(req, res){
 exports.getGiveTest = function(req, res){
   Test.findById(req.params.id, function(err, tests){
     Candidate.findOne({email: req.params.email}, function(err, candidate){
-      var questions = [];
-      for(var i=0; i<tests.question; i++)
-        questions.push = tests.question[i];
-      console.log([questions]);
-      res.render('./test/giveTest', {tests: tests, questions: [questions]});
+      var questions=[];
+      var options= [];
+      for(var i=0; i<tests.questions.length; i++){
+          questions[i]=tests.questions[i];
+          for(var j=0; j<tests.questions[i].opts.length; j++)
+            options.push(tests.questions[i].opts[j]);
+      }
+      res.render('./test/giveTest', {
+        tests: tests,
+        questions: questions,
+        options: options,
+        candidate: candidate
+      });
     });
   });
 };
 exports.postGiveTest = function(req, res){
-  Tests.findById(req.params.id, function(err, tests){
+  Test.findById(req.params.id, function(err, tests){
     Candidate.findOne({email: req.params.email}, function(err, candidate){
-      //store the correct ans for each question
+      var answers =[];
+      var marks = 0;
+      for(var i=0; i<req.body.resultString.length; i++)
+      {
+        answers.push(req.body.resultString[i]);
+      }
+      for(var i=0; i<req.body.resultString.length; i++)
+      {
+        if(answers[i] == tests.questions[i].correct)
+          marks+=10;
+      }
+      candidate.statusCompleted = true;
+      tests.testCompleted.push(candidate._id);
+      candidate.marks = marks;
+      candidate.save();
       tests.save();
-      res.end();
+      res.end("Your test has been submitted Successfully");
+      console.log("End not working");
     });
   });
 };
 
 //all candidates
-exports.getCandidates = function(req, res){
+exports.getDisplayAllCandidates = function(req, res){
   Test.findById(req.params.id, function(err, tests){
     var candidates = [];
-    if(tests){
-      for(var i=0; i< tests.allCandidates.length; i++)
-        candidates.push(tests.allCandidates[i]);
-    }
-    User.find({_id: {$in: candidates}}, function(err, users){
-      res.render('./test/candidates', {tests: tests, users: users});
+    for(var i=0; i< tests.allCandidates.length; i++)
+      candidates.push(tests.allCandidates[i]);
+    Candidate.find({_id: {$in: candidates}}, function(err, candidate){
+      res.render('./test/candidates', {tests: tests, candidate: candidate});
     });
   });
 };
+
 exports.getCompleted = function(req, res){
-  Test.find({companyId: req.user.companyId}, function(err, tests){
-    res.render('./test/completed');
+  Test.findById(req.params.id, function(err, tests){
+    var candidates= [];
+    for(var i=0; i<tests.testCompleted.length;i++)
+      candidates.push(tests.testCompleted[i]);
+    Candidate.find({_id: {$in: candidates}}, function(err, candidate){
+      res.render('./test/completed', {
+        tests: tests,
+        candidate: candidate
+      });
+    });
   });
 };
+exports.postCompleted = function(req, res){
+  Test.findById(req.params.id, function(err, tests){
+    var candidatesAccepted = [];
+    var candidatesRejected = [];
+    candidatesAccepted.push(req.body.accepted);
+    candidatesRejected.push(req.body.rejected);
+    Candidate.find({_id: {$in: candidatesAccepted}}, function(err, candidateAccept){
+      for(var j=0; j<candidateAccept.length; j++){
+        //checking if candidate exists in rejected list
+        for(var k=0; k<tests.rejected.length; k++){
+          if(tests.rejected[k] == candidateAccept[i])
+            tests.rejected[k].remove();
+        }
+        candidateAccept[j].statusAccepted = true;
+        tests.accepted.push(candidateAccept[j]._id);
+        candidateAccept[j].save();
+      }
+      tests.save();
+      //res.end("Accepted");
+    });
+    Candidate.find({_id: {$in: candidatesRejected}}, function(err, candidateReject){
+      for(var i=0; j<candidateReject.length; j++){
+        //checking if candidate exists in accepted list
+        for(var k=0; k<tests.accepted.length; k++){
+          if(tests.accepted[k] == candidateAccept[i])
+            tests.accepted[k].remove();
+        }
+        candidateReject[i].statusRejected = true;
+        tests.rejected.push(candidateReject[i]._id);
+        candidateReject[i].save();
+      }
+      tests.save();
+      //res.end("Rejected");
+    });
+  });
+};
+
 exports.getAccepted = function(req, res){
-  Test.find({companyId: req.user.companyId}, function(err, tests){
-    res.render('./test/accepted');
+  Test.findById(req.params.id, function(err, tests){
+    var candidates = [];
+    for(var i=0; i<tests.accepted.length;i++)
+      candidates.push(tests.accepted[i]);
+      Candidate.find({_id: {$in: candidates}}, function(err, candidate){
+        res.render('./test/accepted', {
+          tests: tests,
+          candidate: candidate
+        });
+      });
   });
 };

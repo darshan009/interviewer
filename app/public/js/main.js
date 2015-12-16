@@ -1,5 +1,5 @@
-
 $(document).ready(function(){
+
   //team member
   $("#team").click(function(){
     $.dataTeam = $(this).attr("data-team-id");
@@ -75,24 +75,69 @@ $(document).ready(function(){
      event.preventDefault();
   });
 
-//all candidates
-  $("#candidates").click(function(){
-    $.dataCandidates = $(this).attr("data-candidates-id");
-    $.get( "/partial/candidates/"+$.dataCandidates, function( data ) {
-      $('#contents').html(data);
+//getting selected answers
+$("#btnSubmit").click(function(){
+  var result = $('input[type="checkbox"]:checked');
+    if(result.length>0){
+      var resultString = [];
+      result.each(function(){
+        resultString.push($(this).val());
+      });
+    }else{
+      alert("you have not selected any answers");
+    }
+    console.log(resultString);
+  $.post( "/partial/"+$("#answeredCheckbox").attr("data-test-answer")+"/"+$("#answeredCheckbox").attr("data-candidate-answer")+"/giveTest",{resultString: resultString})
+  .done(function( data ) {
     });
+});
+
+//all candidates
+$("#allCandidates").click(function(){
+  var dataAllCandidates = $(this).attr("data-allCandidates-id");
+  console.log("all candidates main.js");
+  $.get( "/partial/displayAllCandidates/"+dataAllCandidates, function( data ) {
+    $('#contents').html(data);
   });
+});
 
 //tests completed
-  $("#completed").click(function(){
-    $.get( "/partial/completed", function( data ) {
-      $('#contents').html(data);
-    });
+$("#completed").click(function(){
+  var dataCompleted = $(this).attr("data-completed-id");
+  $.get( "/partial/completed/"+dataCompleted, function( data ) {
+    $('#contents').html(data);
   });
+});
+//accept the candidates, loop through each button to check the clicked one
+$('.acceptButton').each(function () {
+    var $this = $(this);
+    var accepted = [];
+    var dataPostCompleted = $(this).attr("data-accept-btn");
+    $this.on("click", function () {
+        accepted = $(this).data('accept');
+        $.post( "/partial/completed/"+dataPostCompleted, {accepted: accepted})
+        .done(function( data ) {
+          $('#contents').html(data);
+        });
+    });
+});
+$('.rejectButton').each(function () {
+    var $this = $(this);
+    var rejected = [];
+    var dataPostCompletedReject = $(this).attr("data-reject-btn");
+    $this.on("click", function () {
+        rejected = $(this).data('reject');
+        $.post( "/partial/completed/"+dataPostCompletedReject, {rejected: rejected})
+        .done(function( data ) {
+          $('#contents').html(data);
+        });
+    });
+});
 
 //accepted
   $("#accepted").click(function(){
-    $.get( "/partial/accepted", function( data ) {
+    var dataAccepted = $(this).attr("data-accepted-id");
+    $.get( "/partial/accepted/"+dataAccepted, function( data ) {
       $('#contents').html(data);
     });
   });

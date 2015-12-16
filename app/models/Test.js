@@ -6,17 +6,18 @@ var testSchema = mongoose.Schema({
   questions: [{
     question: String,
     opts:[String],
-    correct: Number
+    correct: String
   }],
   companyId: {type: mongoose.Schema.Types.ObjectId, ref: 'Company'},
   testTaker: [{
     candidateId: {type:mongoose.Schema.Types.ObjectId, ref: 'Candidate'},
     question: String,
-    correctAns: Number
+    correctAns: String
   }],
   allCandidates: [{type: mongoose.Schema.Types.ObjectId}],
   testCompleted: [{type: mongoose.Schema.Types.ObjectId}],
-  accepted: [{type: mongoose.Schema.Types.ObjectId}]
+  accepted: [{type: mongoose.Schema.Types.ObjectId}],
+  rejected: [{type: mongoose.Schema.Types.ObjectId}]
 });
 
 module.exports = mongoose.model('Test', testSchema);
