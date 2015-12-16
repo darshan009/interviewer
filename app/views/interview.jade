@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  h3 Candidates invited for interview
+  each interviewCandidates in interviewCandidate
+    p #{interviewCandidate}
+  h3 OR Invite a candidate via email
+  form(method="post")
+    input(type="text" name="email" placeholder="Email")
+    input(type="Submit" value="Submit")

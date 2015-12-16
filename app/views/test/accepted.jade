@@ -2,5 +2,13 @@ extends ../layout2
 
 block content
   h3 Accepted candidates
-  each candidates in candidate
-    p #{candidates.firstname} #{candidates.lastname}
+  table.table.table-striped
+    thead
+      tr
+        th First Name
+        th Last Name
+    tbody
+      each candidates in candidate
+        tr
+          td #{candidates.firstname}
+          td #{candidates.lastname}

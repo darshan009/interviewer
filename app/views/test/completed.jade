@@ -2,7 +2,19 @@ extends ../layout2
 
 block content
   h3 Completed candidates
-  each candidates in candidate
-    p #{candidates.firstname} #{candidates.lastname}
-    input(type="button" value="Accept" data-accept-btn="#{tests._id}" data-accept="#{candidates._id}" class="acceptButton")
-    input(type="button" value="Reject" data-reject-btn="#{tests._id}" data-reject="#{candidates._id}" class="rejectButton")
+  table.table.table-striped
+    thead
+      tr
+        th First Name
+        th Last Name
+        th Accept
+        th Reject
+    tbody
+      each candidates in candidate
+        tr
+          td #{candidates.firstname}
+          td #{candidates.lastname}
+          td
+            input(type="button" value="Accept" data-accept-btn="#{tests._id}" data-accept="#{candidates._id}" class="acceptButton")
+          td
+            input(type="button" value="Reject" data-reject-btn="#{tests._id}" data-reject="#{candidates._id}" class="rejectButton")

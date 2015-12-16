@@ -22,12 +22,12 @@ exports.getTestScreening = function(req, res){
   Test.find({companyId: req.user.companyId}, function(err, tests){
     if(err)
       return next(err);
-    res.render('screening', {tests: tests});
+    res.render('./test/screening', {tests: tests});
   });
 };
 //create test
 exports.getNewTest = function(req, res, next){
-  res.render('newtest');
+  res.render('./test/newtest');
 };
 exports.postNewTest = function(req, res, next){
   var test = new Test({
@@ -43,12 +43,12 @@ exports.getTest = function(req, res){
   Test.findOne({name: req.params.name}, function(err, tests){
     if(err)
       return next(err);
-    res.render('testpage', {tests: tests});
+    res.render('./test/testpage', {tests: tests});
   });
 };
 //test and interview page
 exports.getTestInterview = function(req, res){
-  res.render('test');
+  res.render('./test/test');
 };
 
 //Starting
@@ -75,9 +75,9 @@ exports.postAddMember = function(req, res){
       {
         tests.hiringTeam.push(users._id);
         tests.save();
-        res.redirect('/partial/team/'+tests._id);
+        //res.redirect('/partial/team/'+tests._id);
         res.end("Successfully added");
-      }
+      }else{
       //if user does not exist, send signup mail
       userEmail = req.user.email;
       link="http://localhost:4000/signup";
@@ -94,6 +94,7 @@ exports.postAddMember = function(req, res){
             if(error)
               return console.log(error);
         });
+      }
     });
   });
 };

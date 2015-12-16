@@ -43,6 +43,8 @@ app.use(function(req, res, next){
 var userController = require('./controllers/user');
 var homeController = require('./controllers/home');
 var testController = require('./controllers/test');
+var interviewController = require('./controllers/interview');
+
 //routes
 app.get('/', homeController.getHome);
 app.get('/signup', userController.getSignUp);
@@ -84,6 +86,13 @@ app.get('/partial/completed/:id', testController.getCompleted);
 app.post('/partial/completed/:id', testController.postCompleted);
 //accepted candidates
 app.get('/partial/accepted/:id', testController.getAccepted);
+
+//interviews
+app.get('/test/interview', interviewController.getAllInterview);
+app.get('/test/interview/:name', interviewController.getInterview);
+app.post('/test/interview/:name', interviewController.postInterview);
+app.get('/test/interview/addInterview', interviewController.getAddInterview);
+app.post('/test/interview/addInterview', interviewController.postAddInterview);
 
 //listen
 app.listen('4000', function(){

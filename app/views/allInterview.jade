@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  a(href="/test/interview/addInterview") Schedule new interview
+  br
+  br
+  h3 Your list of interviews
+  each interview in interviews
+    a(href="/test/interview/#{interview.name}") #{interview.name}
+    br
