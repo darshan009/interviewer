@@ -54,14 +54,30 @@ exports.getTestInterview = function(req, res){
 //Starting
 //sidebar elements
 exports.getTeam = function(req, res){
-  Test.findById(req.params.id, function(err, tests){
-    var hiringTeam = [];
-      for(var j=0; j< tests.hiringTeam.length; j++)
-        hiringTeam.push(tests.hiringTeam[j]);
-    User.find({_id: {$in: hiringTeam}}, function(err, users){
-      res.render('./test/team', {tests: tests, users: users});
-    });
-  });
+  Test.findById(req.params.id).exec()
+    .then(function(tests){
+        var hiringTeam = [];
+        for(var j=0; j< tests.hiringTeam.length; j++)
+          hiringTeam.push(tests.hiringTeam[j]);
+        return [hiringTeam, tests];
+      })
+    .then(function(result){
+      var hiringTeam = result[0];
+      return User.find({_id: {$in: hiringTeam}}).exec()
+        .then(function(users){
+          result.push(users);
+          return result;
+        })
+      })
+      .then(function(result){
+        var tests = result[1];
+        var users = result[2];
+        console.log(users);
+        res.render('./test/team', {tests: tests, users: users});
+      })
+      .then(undefined, function(err){
+        console.log(err);
+      });
 };
 exports.getAddMember = function(req, res){
   Test.findById(req.params.id, function(err, tests){
@@ -69,34 +85,39 @@ exports.getAddMember = function(req, res){
   });
 };
 exports.postAddMember = function(req, res){
-  User.findOne({email: req.body.email}, function(err, users){
-    Test.findById(req.params.id, function(err, tests){
-      if(users)
-      {
-        tests.hiringTeam.push(users._id);
-        tests.save();
-        //res.redirect('/partial/team/'+tests._id);
-        res.end("Successfully added");
-      }else{
-      //if user does not exist, send signup mail
-      userEmail = req.user.email;
-      link="http://localhost:4000/signup";
-        //mail options
-        mailOptions = {
-          from: 'Interviewer.com ✔ <sobingt@gmail.com>',
-          to: req.body.email,
-          subject: 'Invitation for team member',
-          text: 'You are invited by '+userEmail+' to join as a team member for '+tests.name,
-          html: "Hello,<br> Please Click on the link to create your account.<br><a href="+link+">Click here to join</a>"
-        };
-        // send mail with defined transport object
-        transporter.sendMail(mailOptions, function(error, info){
-            if(error)
-              return console.log(error);
-        });
-      }
-    });
-  });
+  User.findOne({email: req.body.email}).exec()
+    .then(function(users){
+      return Test.findById(req.params.id).exec()
+        .then(function(tests){
+            if(users)
+            {
+              tests.hiringTeam.push(users._id);
+              tests.save();
+              //res.redirect('/partial/team/'+tests._id);
+              res.end("Successfully added");
+            }else{
+            //if user does not exist, send signup mail
+            userEmail = req.user.email;
+            link="http://localhost:4000/signup";
+              //mail options
+              mailOptions = {
+                from: 'Interviewer.com ✔ <sobingt@gmail.com>',
+                to: req.body.email,
+                subject: 'Invitation for team member',
+                text: 'You are invited by '+userEmail+' to join as a team member for '+tests.name,
+                html: "Hello,<br> Please Click on the link to create your account.<br><a href="+link+">Click here to join</a>"
+              };
+              // send mail with defined transport object
+              transporter.sendMail(mailOptions, function(error, info){
+                  if(error)
+                    return console.log(error);
+              });
+            }
+          })
+      })
+      .then(undefined, function(err){
+        console.log(err);
+      });
 };
 
 //questions part
@@ -107,11 +128,15 @@ exports.getQuestions = function(req, res){
       for(var i=0; i< tests.questions.length; i++)
         questions.push(tests.questions[i]);
     }
+    if(err)
+      return next(err);
     res.render('./test/questions', {questions: questions, tests: tests});
   });
 };
 exports.getAddQuestions = function(req, res){
   Test.findById(req.params.id, function(err, tests){
+    if(err)
+      return next(err);
     res.render('./test/addQuestions', {tests: tests});
   });
 };
@@ -133,6 +158,8 @@ exports.postAddQuestions = function(req, res){
 //invite candidates
 exports.getInvites = function(req, res){
   Test.findById(req.params.id, function(err, tests){
+    if(err)
+      return next(err);
     res.render('./test/invites', {tests: tests});
   });
 };
@@ -169,141 +196,233 @@ exports.postInvites = function(req, res){
 exports.getAddCandidate = function(req, res){
   Test.findById(req.params.id, function(err, tests){
     if(tests)
-      console.log("Coming to add candidates");
       res.render('./test/addCandidate', {tests: tests});
   });
 };
 exports.postAddCandidate = function(req, res){
-  Test.findById(req.params.id, function(err, tests){
-    Candidate.findOne({email: req.params.email}, function(err, candidate){
-          candidate.firstname = req.body.firstname;
-          candidate.lastname = req.body.lastname;
-          candidate.phone = req.body.phone;
-          candidate.save();
-          tests.allCandidates = candidate._id;
-          tests.save();
-          res.redirect("/partial/"+tests._id+"/"+candidate.email+"/givetest");
-      });
-  });
+  Test.findById(req.params.id).exec()
+    .then(function(tests){
+      return tests;
+    })
+    .then(function(result){
+      var tests = result;
+      return Candidate.findOne({email: req.params.email}).exec()
+        .then(function(candidate){
+            candidate.firstname = req.body.firstname;
+            candidate.lastname = req.body.lastname;
+            candidate.phone = req.body.phone;
+            candidate.save();
+            tests.allCandidates = candidate._id;
+            tests.save();
+            res.redirect("/partial/"+tests._id+"/"+candidate.email+"/givetest");
+        });
+    })
+    .then(undefined, function(err){
+      console.log(err);
+    });
 };
 
 //give tests
 exports.getGiveTest = function(req, res){
-  Test.findById(req.params.id, function(err, tests){
-    Candidate.findOne({email: req.params.email}, function(err, candidate){
-      var questions=[];
-      var options= [];
-      for(var i=0; i<tests.questions.length; i++){
-          questions[i]=tests.questions[i];
-          for(var j=0; j<tests.questions[i].opts.length; j++)
-            options.push(tests.questions[i].opts[j]);
-      }
-      res.render('./test/giveTest', {
-        tests: tests,
-        questions: questions,
-        options: options,
-        candidate: candidate
+  Test.findById(req.params.id).exec()
+    .then(function(tests){
+      return Candidate.findOne({email: req.params.email}).exec()
+      .then(function(candidate){
+        var questions=[];
+        var options= [];
+        for(var i=0; i<tests.questions.length; i++){
+            questions[i]=tests.questions[i];
+            for(var j=0; j<tests.questions[i].opts.length; j++)
+              options.push(tests.questions[i].opts[j]);
+        return [tests, candidate, options, questions];
+        }
+      })
+    })
+      .then(function(result){
+        var tests = result[0];
+        var candidate = result[1];
+        var options = result[2];
+        var questions = result[3];
+        res.render('./test/giveTest', {
+          tests: tests,
+          questions: questions,
+          options: options,
+          candidate: candidate
+        });
+      })
+      .then(undefined, function(err){
+        console.log(err);
       });
-    });
-  });
 };
 exports.postGiveTest = function(req, res){
-  Test.findById(req.params.id, function(err, tests){
-    Candidate.findOne({email: req.params.email}, function(err, candidate){
-      var answers =[];
-      var marks = 0;
-      for(var i=0; i<req.body.resultString.length; i++)
-      {
-        answers.push(req.body.resultString[i]);
-      }
-      for(var i=0; i<req.body.resultString.length; i++)
-      {
-        if(answers[i] == tests.questions[i].correct)
-          marks+=10;
-      }
-      candidate.statusCompleted = true;
-      tests.testCompleted.push(candidate._id);
-      candidate.marks = marks;
-      candidate.save();
-      tests.save();
-      res.end("Your test has been submitted Successfully");
-      console.log("End not working");
+  Test.findById(req.params.id).exec()
+  .then(function(tests){
+    return tests;
+  })
+  .then(function(result){
+    var tests = result;
+    return Candidate.findOne({email: req.params.email}).exec()
+      .then(function(candidate){
+        var answers =[];
+        var marks = 0;
+        for(var i=0; i<req.body.resultString.length; i++)
+        {
+          answers.push(req.body.resultString[i]);
+        }
+        for(var i=0; i<req.body.resultString.length; i++)
+        {
+          if(answers[i] == tests.questions[i].correct)
+            marks+=10;
+        }
+        candidate.statusCompleted = true;
+        tests.testCompleted.push(candidate._id);
+        candidate.marks = marks;
+        candidate.save();
+        tests.save();
+        res.end("Your test has been submitted Successfully");
+        console.log("End not working");
+      })
+  })
+    .then(undefined, function(err){
+      console.log(err);
     });
-  });
 };
 
 //all candidates
 exports.getDisplayAllCandidates = function(req, res){
-  Test.findById(req.params.id, function(err, tests){
+  Test.findById(req.params.id).exec()
+  .then(function(tests){
     var candidates = [];
     for(var i=0; i< tests.allCandidates.length; i++)
       candidates.push(tests.allCandidates[i]);
-    Candidate.find({_id: {$in: candidates}}, function(err, candidate){
-      res.render('./test/candidates', {tests: tests, candidate: candidate});
-    });
+    return [tests, candidates];
+  })
+  .then(function(result){
+    var tests = result[0];
+    var candidates = result[1];
+    return Candidate.find({_id: {$in: candidates}}).exec()
+      .then(function(candidate){
+        result.push(candidate);
+        return result;
+      })
+  })
+  .then(function(result){
+    var tests = result[0];
+    var candidate = result[2];
+    res.render('./test/candidates', {tests: tests, candidate: candidate});
+  })
+  .then(undefined, function(err){
+    console.log(err);
   });
 };
 
 exports.getCompleted = function(req, res){
-  Test.findById(req.params.id, function(err, tests){
+  Test.findById(req.params.id).exec()
+  .then(function(tests){
     var candidates= [];
     for(var i=0; i<tests.testCompleted.length;i++)
       candidates.push(tests.testCompleted[i]);
-    Candidate.find({_id: {$in: candidates}}, function(err, candidate){
-      res.render('./test/completed', {
-        tests: tests,
-        candidate: candidate
-      });
+    return [tests, candidates];
+  })
+  .then(function(result){
+    var tests = result[0];
+    var candidates = result[1];
+    return Candidate.find({_id: {$in: candidates}}).exec()
+      .then(function(candidate){
+        result.push(candidate);
+        return result;
+      })
+  })
+  .then(function(result){
+    var tests = result[0];
+    var candidate = result[2];
+    res.render('./test/completed', {
+      tests: tests,
+      candidate: candidate
     });
+  })
+  .then(undefined, function(err){
+    console.log(err);
   });
 };
 exports.postCompleted = function(req, res){
-  Test.findById(req.params.id, function(err, tests){
+  Test.findById(req.params.id).exec()
+  .then(function(tests){
     var candidatesAccepted = [];
     var candidatesRejected = [];
     candidatesAccepted.push(req.body.accepted);
-    candidatesRejected.push(req.body.rejected);
-    Candidate.find({_id: {$in: candidatesAccepted}}, function(err, candidateAccept){
-      for(var j=0; j<candidateAccept.length; j++){
-        //checking if candidate exists in rejected list
-        for(var k=0; k<tests.rejected.length; k++){
-          if(tests.rejected[k] == candidateAccept[i])
-            tests.rejected[k].remove();
+    candidatesAccepted.push(req.body.rejected);
+    return [tests, candidatesAccepted, candidatesAccepted];
+  })
+  .then(function(result){
+    var tests = result[0];
+    var candidatesAccepted = result[1];
+    return Candidate.find({_id: {$in: candidatesAccepted}}).exec()
+      .then(function(candidateAccept){
+        for(var j=0; j<candidateAccept.length; j++){
+          //checking if candidate exists in rejected list
+          for(var k=0; k<tests.rejected.length; k++){
+            if(tests.rejected[k] == candidateAccept[i])
+              tests.rejected[k].remove();
+          }
+          candidateAccept[j].statusAccepted = true;
+          tests.accepted.push(candidateAccept[j]._id);
+          candidateAccept[j].save();
         }
-        candidateAccept[j].statusAccepted = true;
-        tests.accepted.push(candidateAccept[j]._id);
-        candidateAccept[j].save();
-      }
-      tests.save();
-      //res.end("Accepted");
-    });
-    Candidate.find({_id: {$in: candidatesRejected}}, function(err, candidateReject){
-      for(var i=0; j<candidateReject.length; j++){
-        //checking if candidate exists in accepted list
-        for(var k=0; k<tests.accepted.length; k++){
-          if(tests.accepted[k] == candidateAccept[i])
-            tests.accepted[k].remove();
+        tests.save();
+        //res.end("Accepted");
+      })
+  })
+  .then(function(result){
+    var tests = result[0];
+    var candidatesAccepted = result[1];
+    return Candidate.find({_id: {$in: candidatesRejected}}).exec()
+      .then(function(err, candidateReject){
+        for(var i=0; j<candidateReject.length; j++){
+          //checking if candidate exists in accepted list
+          for(var k=0; k<tests.accepted.length; k++){
+            if(tests.accepted[k] == candidateAccept[i])
+              tests.accepted[k].remove();
+          }
+          candidateReject[i].statusRejected = true;
+          tests.rejected.push(candidateReject[i]._id);
+          candidateReject[i].save();
         }
-        candidateReject[i].statusRejected = true;
-        tests.rejected.push(candidateReject[i]._id);
-        candidateReject[i].save();
-      }
-      tests.save();
-      //res.end("Rejected");
-    });
+        tests.save();
+        //res.end("Rejected");
+      })
+  })
+  .then(undefined, function(err){
+    console.log(err);
   });
 };
 
 exports.getAccepted = function(req, res){
-  Test.findById(req.params.id, function(err, tests){
+  Test.findById(req.params.id).exec()
+  .then(function(tests){
     var candidates = [];
     for(var i=0; i<tests.accepted.length;i++)
       candidates.push(tests.accepted[i]);
-      Candidate.find({_id: {$in: candidates}}, function(err, candidate){
-        res.render('./test/accepted', {
-          tests: tests,
-          candidate: candidate
-        });
-      });
+    return [tests, candidates];
+  })
+  .then(function(result){
+    var tests = result[0];
+    var candidates = result[1];
+    return Candidate.find({_id: {$in: candidates}}).exec()
+    .then(function(candidate){
+      result.push(candidate);
+      return result;
+    })
+  })
+  .then(function(result){
+    var tests = result[0];
+    var candidate = result[2];
+    res.render('./test/accepted', {
+      tests: tests,
+      candidate: candidate
+    });
+  })
+  .then(undefined, function(err){
+    console.log(err);
   });
 };

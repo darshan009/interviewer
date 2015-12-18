@@ -18,8 +18,10 @@ nav.navbar.navbar-default
         li
           a(href='/signup') Signup
       else
-        li
-          a(href='/') #{currentUser.email}
-      if(currentUser)
-        li
-          a(href="/logout") Logout
+        li.dropdown
+          a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-haspopup='true', aria-expanded='false')
+            | #{currentUser.email}
+            span.caret
+          ul.dropdown-menu
+            li
+              a(href='/logout') Logout
